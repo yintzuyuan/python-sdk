@@ -1,0 +1,57 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天 UTC 00:00 執行
+  workflow_dispatch:      # 允許手動觸發
+  
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Add Upstream Remote
+        run: |
+          git remote add upstream https://github.com/modelcontextprotocol/python-sdk.git
+          git fetch upstream
+      
+      - name: Configure Git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      
+      - name: Create Sync Branch
+        run: |
+          # 取得目前時間戳記
+          timestamp=$(date +%Y%m%d%H%M%S)
+          # 建立新分支
+          git checkout -b sync/upstream-$timestamp
+          
+          # 合併上游主分支的變更
+          git merge upstream/main --no-edit
+          
+          # 如果有衝突，中止合併並退出
+          if [ $? -ne 0 ]; then
+            echo "合併發生衝突，需要手動處理"
+            exit 1
+          fi
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: '⏫ 同步上游儲存庫更新'
+          body: |
+            自動同步來自上游儲存庫的更新。
+            
+            這個 PR 是由 GitHub Action 自動建立的。
+            請檢查變更內容後再合併。
+          branch: sync/upstream-${{ github.run_number }}
+          delete-branch: true
+          labels: |
+            sync-upstream
+            automated
