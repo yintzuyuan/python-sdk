@@ -69,7 +69,8 @@ class NotificationParams(BaseModel):
 
     meta: Meta | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
 
 
@@ -106,7 +107,8 @@ class Result(BaseModel):
 
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -401,7 +403,8 @@ class Resource(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -426,7 +429,8 @@ class ResourceTemplate(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -476,7 +480,8 @@ class ResourceContents(BaseModel):
     """The MIME type of this resource, if known."""
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -607,7 +612,8 @@ class Prompt(BaseModel):
     """A list of arguments to use for templating the prompt."""
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -644,7 +650,8 @@ class TextContent(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -663,7 +670,8 @@ class ImageContent(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -682,7 +690,8 @@ class AudioContent(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -708,7 +717,8 @@ class EmbeddedResource(BaseModel):
     annotations: Annotations | None = None
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -811,7 +821,8 @@ class Tool(BaseModel):
     """Optional additional tool information."""
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -1117,7 +1128,8 @@ class Root(BaseModel):
     """
     meta: dict[str, Any] | None = Field(alias="_meta", default=None)
     """
-    Reserved by MCP for protocol-level metadata; implementations must not make assumptions about its contents.
+    See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
+    for notes on _meta usage.
     """
     model_config = ConfigDict(extra="allow")
 
