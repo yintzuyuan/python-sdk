@@ -54,7 +54,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.shared.context import LifespanContextT, RequestContext, RequestT
 from mcp.types import (
     AnyFunction,
-    Content,
+    ContentBlock,
     GetPromptResult,
     TextContent,
     ToolAnnotations,
@@ -260,7 +260,7 @@ class FastMCP:
             request_context = None
         return Context(request_context=request_context, fastmcp=self)
 
-    async def call_tool(self, name: str, arguments: dict[str, Any]) -> Sequence[Content]:
+    async def call_tool(self, name: str, arguments: dict[str, Any]) -> Sequence[ContentBlock]:
         """Call a tool by name with arguments."""
         context = self.get_context()
         result = await self._tool_manager.call_tool(name, arguments, context=context)
@@ -878,12 +878,12 @@ class FastMCP:
 
 def _convert_to_content(
     result: Any,
-) -> Sequence[Content]:
+) -> Sequence[ContentBlock]:
     """Convert a result to a sequence of content objects."""
     if result is None:
         return []
 
-    if isinstance(result, Content):
+    if isinstance(result, ContentBlock):
         return [result]
 
     if isinstance(result, Image):
