@@ -31,6 +31,8 @@
     - [Images](#images)
     - [Context](#context)
     - [Completions](#completions)
+    - [Elicitation](#elicitation)
+    - [Authentication](#authentication)
   - [Running Your Server](#running-your-server)
     - [Development Mode](#development-mode)
     - [Claude Desktop Integration](#claude-desktop-integration)
@@ -74,7 +76,7 @@ The Model Context Protocol allows applications to provide context for LLMs in a 
 
 ### Adding MCP to your python project
 
-We recommend using [uv](https://docs.astral.sh/uv/) to manage your Python projects. 
+We recommend using [uv](https://docs.astral.sh/uv/) to manage your Python projects.
 
 If you haven't created a uv-managed project yet, create one:
 
@@ -372,6 +374,50 @@ async def handle_completion(
                     return Completion(values=filtered)
     return None
 ```
+### Elicitation
+
+Request additional information from users during tool execution:
+
+```python
+from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.elicitation import (
+    AcceptedElicitation,
+    DeclinedElicitation,
+    CancelledElicitation,
+)
+from pydantic import BaseModel, Field
+
+mcp = FastMCP("Booking System")
+
+
+@mcp.tool()
+async def book_table(date: str, party_size: int, ctx: Context) -> str:
+    """Book a table with confirmation"""
+
+    # Schema must only contain primitive types (str, int, float, bool)
+    class ConfirmBooking(BaseModel):
+        confirm: bool = Field(description="Confirm booking?")
+        notes: str = Field(default="", description="Special requests")
+
+    result = await ctx.elicit(
+        message=f"Confirm booking for {party_size} on {date}?", schema=ConfirmBooking
+    )
+
+    match result:
+        case AcceptedElicitation(data=data):
+            if data.confirm:
+                return f"Booked! Notes: {data.notes or 'None'}"
+            return "Booking cancelled"
+        case DeclinedElicitation():
+            return "Booking declined"
+        case CancelledElicitation():
+            return "Booking cancelled"
+```
+
+The `elicit()` method returns an `ElicitationResult` with:
+- `action`: "accept", "decline", or "cancel"
+- `data`: The validated response (only when accepted)
+- `validation_error`: Any validation error message
 
 ### Authentication
 
