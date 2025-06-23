@@ -47,6 +47,10 @@ cd examples/servers/simple-auth
 
 # Start Resource Server on port 8001, connected to Authorization Server
 uv run mcp-simple-auth-rs --port=8001 --auth-server=http://localhost:9000  --transport=streamable-http
+
+# With RFC 8707 strict resource validation (recommended for production)
+uv run mcp-simple-auth-rs --port=8001 --auth-server=http://localhost:9000  --transport=streamable-http --oauth-strict
+
 ```
 
 
