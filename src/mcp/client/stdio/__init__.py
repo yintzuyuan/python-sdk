@@ -11,6 +11,7 @@ from anyio.streams.text import TextReceiveStream
 from pydantic import BaseModel, Field
 
 import mcp.types as types
+from mcp.shared.message import SessionMessage
 
 from .win32 import (
     create_windows_process,
@@ -98,29 +99,33 @@ async def stdio_client(server: StdioServerParameters, errlog: TextIO = sys.stder
     Client transport for stdio: this will connect to a server by spawning a
     process and communicating with it over stdin/stdout.
     """
-    read_stream: MemoryObjectReceiveStream[types.JSONRPCMessage | Exception]
-    read_stream_writer: MemoryObjectSendStream[types.JSONRPCMessage | Exception]
+    read_stream: MemoryObjectReceiveStream[SessionMessage | Exception]
+    read_stream_writer: MemoryObjectSendStream[SessionMessage | Exception]
 
-    write_stream: MemoryObjectSendStream[types.JSONRPCMessage]
-    write_stream_reader: MemoryObjectReceiveStream[types.JSONRPCMessage]
+    write_stream: MemoryObjectSendStream[SessionMessage]
+    write_stream_reader: MemoryObjectReceiveStream[SessionMessage]
 
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
     write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
-    command = _get_executable_command(server.command)
+    try:
+        command = _get_executable_command(server.command)
 
-    # Open process with stderr piped for capture
-    process = await _create_platform_compatible_process(
-        command=command,
-        args=server.args,
-        env=(
-            {**get_default_environment(), **server.env}
-            if server.env is not None
-            else get_default_environment()
-        ),
-        errlog=errlog,
-        cwd=server.cwd,
-    )
+        # Open process with stderr piped for capture
+        process = await _create_platform_compatible_process(
+            command=command,
+            args=server.args,
+            env=({**get_default_environment(), **server.env} if server.env is not None else get_default_environment()),
+            errlog=errlog,
+            cwd=server.cwd,
+        )
+    except OSError:
+        # Clean up streams if process creation fails
+        await read_stream.aclose()
+        await write_stream.aclose()
+        await read_stream_writer.aclose()
+        await write_stream_reader.aclose()
+        raise
 
     async def stdout_reader():
         assert process.stdout, "Opened process is missing stdout"
@@ -143,7 +148,8 @@ async def stdio_client(server: StdioServerParameters, errlog: TextIO = sys.stder
                             await read_stream_writer.send(exc)
                             continue
 
-                        await read_stream_writer.send(message)
+                        session_message = SessionMessage(message)
+                        await read_stream_writer.send(session_message)
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
 
@@ -152,8 +158,8 @@ async def stdio_client(server: StdioServerParameters, errlog: TextIO = sys.stder
 
         try:
             async with write_stream_reader:
-                async for message in write_stream_reader:
-                    json = message.model_dump_json(by_alias=True, exclude_none=True)
+                async for session_message in write_stream_reader:
+                    json = session_message.message.model_dump_json(by_alias=True, exclude_none=True)
                     await process.stdin.send(
                         (json + "\n").encode(
                             encoding=server.encoding,
@@ -173,10 +179,18 @@ async def stdio_client(server: StdioServerParameters, errlog: TextIO = sys.stder
             yield read_stream, write_stream
         finally:
             # Clean up process to prevent any dangling orphaned processes
-            if sys.platform == "win32":
-                await terminate_windows_process(process)
-            else:
-                process.terminate()
+            try:
+                if sys.platform == "win32":
+                    await terminate_windows_process(process)
+                else:
+                    process.terminate()
+            except ProcessLookupError:
+                # Process already exited, which is fine
+                pass
+            await read_stream.aclose()
+            await write_stream.aclose()
+            await read_stream_writer.aclose()
+            await write_stream_reader.aclose()
 
 
 def _get_executable_command(command: str) -> str:
@@ -209,8 +223,6 @@ async def _create_platform_compatible_process(
     if sys.platform == "win32":
         process = await create_windows_process(command, args, env, errlog, cwd)
     else:
-        process = await anyio.open_process(
-            [command, *args], env=env, stderr=errlog, cwd=cwd
-        )
+        process = await anyio.open_process([command, *args], env=env, stderr=errlog, cwd=cwd)
 
     return process
